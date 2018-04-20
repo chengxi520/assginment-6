@@ -1,0 +1,115 @@
+---
+title: "Forked R map"
+author: "Xi Cheng, Forked by Lin Li"
+date: "March 25, 2018"
+output: pdf_document
+---
+
+#part1
+
+##Find the town of Bude in Western England. This is a town that is well-known as a beach resort. Ana here are two maps of Bude - a road map and a watercolor map:
+
+###road map:
+```{r,echo=FALSE,message=FALSE}
+library(ggmap)
+library(tidyverse)
+ 
+# simple mapping with ggmap
+
+# grab a center/zoom map and compute its bounding box
+gc <- geocode("town of bude")
+map <- get_map(gc,zoom = 16)
+bb <- attr(map, "bb")
+bbox <- bb2bbox(bb)
+
+
+ggmap(map) +
+  geom_point(
+    aes(x = lon, y = lat),
+    data = gc, color = "red", size = 1
+  )
+```
+
+```{r,echo=FALSE}
+map1 <- get_map(gc, zoom=16)
+
+ggmap(map1) +
+  geom_point(
+    aes(x = lon, y = lat),
+    data = gc, color = "blue", size = 3
+  )
+```
+
+#set the zoom
+```{r,echo=FALSE}
+map2 <- get_map("town of bude", zoom= 16,maptype = "roadmap")
+ggmap(map2)
+```
+
+###watercolor map
+```{r,echo=FALSE,message=FALSE}
+map3 <- get_map("town of bude",zoom=16, maptype= "watercolor")
+ggmap(map3)
+```
+
+#part 2
+
+
+###Green: The Beach At Bude: -4.549112,50.831502
+###Blue: Tommy Jacks Beach Hotel: -4.550904,50.836184
+
+here is the vacation spots that I might like:
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+x <- "vocation stops" 
+vs <- "vs address"
+i <- c(1:9)
+x[i] <- c("Breakwater Beach,UK", "Summerleaze Beach","Crooklets Beach","Northcott Mouth Beach,UK","Widemouth Beach","Sandy Mouth Beach,UK","Duckpool Beach,UK","Millook Haven Beach","cricket grounds,UK")
+
+
+for(i in 1:9){
+  vs <- geocode(x)
+}
+rownames(vs) <- x[1:9]
+```
+
+```{r}
+ggmap(get_googlemap(center = 'town of bude',zoom= 15,maptype = "roadmap"))+
+geom_point(data=vs,aes(x=lon,y=lat),colour = 'red',size=1)+
+geom_point(aes(x =  -4.549112 , y = 50.831502),color = "green", size = 1) +
+geom_point(aes(x = -4.550904 , y = 50.836184),color = "blue", size = 1)
+
+```
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+ggmap(get_googlemap(center = 'town of bude',zoom= 10,maptype = "hybrid"))+
+geom_point(data=vs,aes(x=lon,y=lat),colour = 'red',size=1)+
+geom_point(aes(x =  -4.549112 , y = 50.831502),color = "green", size = 1) +
+geom_point(aes(x = -4.550904 , y = 50.836184),color = "blue", size = 1)
+```
+
+###And here is the address of the pub
+```{r,echo=FALSE,message=FALSE}
+pub <-  geocode("The Barrel at Bude")
+
+pub2 <- get_googlemap(center = "town of bude", zoom = 15)
+ggmap(pub2,extent = "normal",zoom=25)+geom_point(data=pub,aes(x=lon,y=lat),color="blue")
+
+
+```
+
+###If we want to navigation from the beach to the pub, we can use this route.
+```{r,echo=FALSE}
+
+from <- "Bude and North Cornwall Golf Club"
+to <- "The Barrel at Bude"
+route_df <- route(from, to, structure = "route")
+ggmap(get_googlemap(center = 'town of bude',zoom= 15,maptype = "roadmap")) + 
+  geom_point(aes(x = lon, y = lat), col = "red", size = 2) +
+  geom_point(aes(x = lon, y = lat), size = 2) +
+  geom_path(aes(x = lon, y = lat), col = "blue", size = 1, data = route_df, end = "round")
+```
+
+#Images of the Beach At Bude
+![The Beach At Bude](beach.jpg)
+
+![Tommy Jacks Beach Hotel](tommy.jpg)
